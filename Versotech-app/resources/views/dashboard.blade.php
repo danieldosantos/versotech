@@ -224,9 +224,9 @@
             background: rgba(191, 219, 254, 0.4);
         }
         td {
-            white-space: normal;
-            word-break: normal;
-            overflow-wrap: anywhere;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .table-wrapper::-webkit-scrollbar {
             height: 10px;
@@ -327,6 +327,8 @@
                 position: relative;
                 padding-left: 48%;
                 white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
             }
             tbody td::before {
                 position: absolute;
