@@ -58,7 +58,7 @@ class DataProcessingController extends Controller
             // Deduplicar por codigo_produto mantendo a linha mais recente por data_atualizacao antes do upsert
             DB::statement(
                 "WITH dedup AS (
-                    SELECT *, ROW_NUMBER() OVER (PARTITION BY codigo_produto ORDER BY COALESCE(data_atualizacao, NOW()) DESC) AS rn
+                    SELECT *, ROW_NUMBER() OVER (PARTITION BY codigo_produto ORDER BY COALESCE(data_atualizacao, '1900-01-01') DESC) AS rn
                     FROM vw_precos_processados
                 )
                 INSERT INTO preco_insercao (codigo_produto, valor, moeda, percentual_desconto, percentual_acrescimo, valor_promocional, data_inicio_promocao, data_fim_promocao, data_atualizacao, origem, tipo_cliente, vendedor_responsavel, observacao, status, created_at, updated_at)
@@ -92,8 +92,18 @@ class DataProcessingController extends Controller
 
     public function listProductsWithPrices(): JsonResponse
     {
+        $vwPrices = DB::raw("(
+            SELECT * FROM (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY codigo_produto
+                    ORDER BY COALESCE(data_atualizacao, DATE '1900-01-01') DESC
+                ) rn
+                FROM vw_precos_processados
+            ) x WHERE rn = 1
+        ) as vp");
         $produtos = DB::table('produto_insercao as p')
             ->leftJoin('preco_insercao as pr', 'p.codigo', '=', 'pr.codigo_produto')
+            ->leftJoin($vwPrices, 'p.codigo', '=', 'vp.codigo_produto')
             ->select([
                 'p.codigo',
                 'p.nome',
@@ -114,9 +124,9 @@ class DataProcessingController extends Controller
                 'pr.valor_promocional',
                 'pr.percentual_desconto',
                 'pr.percentual_acrescimo',
-                'pr.data_inicio_promocao',
-                'pr.data_fim_promocao',
-                'pr.data_atualizacao',
+                DB::raw("TO_CHAR(COALESCE(pr.data_inicio_promocao, vp.data_inicio_promocao), 'YYYY-MM-DD') as data_inicio_promocao"),
+                DB::raw("TO_CHAR(COALESCE(pr.data_fim_promocao, vp.data_fim_promocao), 'YYYY-MM-DD') as data_fim_promocao"),
+                DB::raw("TO_CHAR(COALESCE(pr.data_atualizacao, vp.data_atualizacao), 'YYYY-MM-DD') as data_atualizacao"),
                 'pr.origem',
                 'pr.tipo_cliente',
                 'pr.vendedor_responsavel',
@@ -143,8 +153,19 @@ class DataProcessingController extends Controller
      */
     public function listProductsWithPricesInclusive(): JsonResponse
     {
+        $vwPrices = DB::raw("(
+            SELECT * FROM (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY codigo_produto
+                    ORDER BY COALESCE(data_atualizacao, DATE '1900-01-01') DESC
+                ) rn
+                FROM vw_precos_processados
+            ) x WHERE rn = 1
+        ) as vp");
+
         $produtos = DB::table('produto_insercao as p')
             ->leftJoin('preco_insercao as pr', 'p.codigo', '=', 'pr.codigo_produto')
+            ->leftJoin($vwPrices, 'p.codigo', '=', 'vp.codigo_produto')
             ->select([
                 'p.codigo',
                 'p.nome',
@@ -166,9 +187,9 @@ class DataProcessingController extends Controller
                 'pr.valor_promocional',
                 'pr.percentual_desconto',
                 'pr.percentual_acrescimo',
-                'pr.data_inicio_promocao',
-                'pr.data_fim_promocao',
-                'pr.data_atualizacao',
+                DB::raw("TO_CHAR(COALESCE(pr.data_inicio_promocao, vp.data_inicio_promocao), 'YYYY-MM-DD') as data_inicio_promocao"),
+                DB::raw("TO_CHAR(COALESCE(pr.data_fim_promocao, vp.data_fim_promocao), 'YYYY-MM-DD') as data_fim_promocao"),
+                DB::raw("TO_CHAR(COALESCE(pr.data_atualizacao, vp.data_atualizacao), 'YYYY-MM-DD') as data_atualizacao"),
                 'pr.origem',
                 'pr.tipo_cliente',
                 'pr.vendedor_responsavel',

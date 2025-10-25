@@ -66,8 +66,8 @@ return new class extends Migration
                 NULLIF(b.unidade, '') AS unidade,
                 b.ativo,
                 CASE
-                    WHEN b.data_bruta ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN TO_DATE(b.data_bruta, 'YYYY-MM-DD')
-                    WHEN b.data_bruta ~ '^\\d{2}-\\d{2}-\\d{4}$' THEN TO_DATE(b.data_bruta, 'DD-MM-YYYY')
+                    WHEN b.data_bruta ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(b.data_bruta, 'YYYY-MM-DD')
+                    WHEN b.data_bruta ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN TO_DATE(b.data_bruta, 'DD-MM-YYYY')
                     ELSE NULL
                 END AS data_cadastro
             FROM base b;
@@ -123,18 +123,24 @@ return new class extends Migration
                     ELSE REPLACE(b.promo_numeric_raw, ',', '.')::numeric
                 END AS valor_promocional,
                 CASE
-                    WHEN b.dt_ini_raw ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN TO_DATE(b.dt_ini_raw, 'YYYY-MM-DD')
-                    WHEN b.dt_ini_raw ~ '^\\d{2}-\\d{2}-\\d{4}$' THEN TO_DATE(b.dt_ini_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_ini_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(b.dt_ini_raw, 'YYYY-MM-DD')
+                    WHEN b.dt_ini_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_ini_raw, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')::date
+                    WHEN b.dt_ini_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN TO_DATE(b.dt_ini_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_ini_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_ini_raw, 'T', ' '), 'DD-MM-YYYY HH24:MI:SS')::date
                     ELSE NULL
                 END AS data_inicio_promocao,
                 CASE
-                    WHEN b.dt_fim_raw ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN TO_DATE(b.dt_fim_raw, 'YYYY-MM-DD')
-                    WHEN b.dt_fim_raw ~ '^\\d{2}-\\d{2}-\\d{4}$' THEN TO_DATE(b.dt_fim_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_fim_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(b.dt_fim_raw, 'YYYY-MM-DD')
+                    WHEN b.dt_fim_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_fim_raw, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')::date
+                    WHEN b.dt_fim_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN TO_DATE(b.dt_fim_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_fim_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_fim_raw, 'T', ' '), 'DD-MM-YYYY HH24:MI:SS')::date
                     ELSE NULL
                 END AS data_fim_promocao,
                 CASE
-                    WHEN b.dt_atual_raw ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN TO_DATE(b.dt_atual_raw, 'YYYY-MM-DD')
-                    WHEN b.dt_atual_raw ~ '^\\d{2}-\\d{2}-\\d{4}$' THEN TO_DATE(b.dt_atual_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_atual_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN TO_DATE(b.dt_atual_raw, 'YYYY-MM-DD')
+                    WHEN b.dt_atual_raw ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_atual_raw, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')::date
+                    WHEN b.dt_atual_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN TO_DATE(b.dt_atual_raw, 'DD-MM-YYYY')
+                    WHEN b.dt_atual_raw ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}[ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?$' THEN TO_TIMESTAMP(REPLACE(b.dt_atual_raw, 'T', ' '), 'DD-MM-YYYY HH24:MI:SS')::date
                     ELSE NULL
                 END AS data_atualizacao,
                 NULLIF(b.origem, '') AS origem,
