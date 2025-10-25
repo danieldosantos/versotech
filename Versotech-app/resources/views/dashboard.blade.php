@@ -73,10 +73,15 @@
             padding: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             text-align: left;
-            /* manter em uma linha e cortar com reticências quando necessário */
+        }
+        th {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        }
+        td {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            word-break: break-word;
         }
         thead {
             background: #1f2937;
@@ -91,9 +96,10 @@
             font-size: 0.9rem;
         }
         #products-table.product-only td {
-            white-space: nowrap;   /* mantém o conteúdo inteiro */
+            white-space: normal;   /* permite visualizar textos longos */
             padding: 0.5rem 0.6rem; /* compensa a largura reduzida */
             font-size: 0.9rem;
+            word-break: break-word;
         }
         /* Larguras fixas por coluna (somente no modo produto) */
         #products-table.product-only th:nth-child(1), #products-table.product-only td:nth-child(1) { width: 70px; }
@@ -122,8 +128,9 @@
         #products-table.price-full td {
             font-size: 0.95rem;
             padding: 0.6rem 0.65rem;
-            white-space: nowrap;    /* mantém o conteúdo inteiro */
+            white-space: normal;    /* permite visualizar textos longos */
             line-height: 1.25;
+            word-break: break-word;
         }
         /* alinhar colunas numéricas à direita no modo com preços */
         #products-table.price-full td:nth-child(7),  /* Peso */
