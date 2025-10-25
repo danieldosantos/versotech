@@ -204,9 +204,48 @@
                 <td data-label="Cor">${item.cor ?? '—'}</td>
                 <td data-label="Peso (kg)">${formatNumber(item.peso_kg, 3)}</td>
                 <td data-label="Dimensões">${[item.largura_cm, item.altura_cm, item.profundidade_cm].map(v => formatNumber(v)).join(' × ')}</td>
-                <td data-label="Preço">${item.valor ? `R$ ${formatNumber(item.valor)}` : '—'}</td>
-                <td data-label="Promoção">${item.valor_promocional ? `R$ ${formatNumber(item.valor_promocional)}` : '—'}</td>
+                <td data-label="Preço">${(item.valor !== null && item.valor !== undefined) ? `R$ ${formatNumber(item.valor)}` : (item.valor_promocional ? `R$ ${formatNumber(item.valor_promocional)}` : '—')}</td>
+                <td data-label="Promoção">${(item.valor_promocional && item.valor_promocional !== null && item.valor_promocional !== item.valor) ? `R$ ${formatNumber(item.valor_promocional)}` : '—'}</td>
                 <td data-label="Desconto">${item.percentual_desconto ? `${formatNumber(item.percentual_desconto * 100, 1)}%` : '—'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Render somente colunas de produto (sem preço)
+    function renderProductsOnly(data) {
+        // rebuild header to product-only columns
+        const thead = document.querySelector('#products-table thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Fabricante</th>
+                <th>Modelo</th>
+                <th>Cor</th>
+                <th>Peso (kg)</th>
+                <th>Dimensões (L×A×P cm)</th>
+            </tr>
+        `;
+
+        tableBody.innerHTML = '';
+        if (!data.length) {
+            tableBody.innerHTML = '<tr class="empty"><td colspan="8">Nenhum produto disponível.</td></tr>';
+            return;
+        }
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td data-label="Código">${item.codigo}</td>
+                <td data-label="Nome">${item.nome}</td>
+                <td data-label="Categoria">${item.categoria ?? '—'}${item.subcategoria ? ' / ' + item.subcategoria : ''}</td>
+                <td data-label="Fabricante">${item.fabricante ?? '—'}</td>
+                <td data-label="Modelo">${item.modelo ?? '—'}</td>
+                <td data-label="Cor">${item.cor ?? '—'}</td>
+                <td data-label="Peso (kg)">${formatNumber(item.peso_kg, 3)}</td>
+                <td data-label="Dimensões">${[item.largura_cm, item.altura_cm, item.profundidade_cm].map(v => formatNumber(v)).join(' × ')}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -216,7 +255,37 @@
         setLoading(true);
         try {
             const result = await callEndpoint('/api/produtos-com-precos');
+            // ensure table header includes price columns
+            const thead = document.querySelector('#products-table thead');
+            thead.innerHTML = `
+            <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Fabricante</th>
+                <th>Modelo</th>
+                <th>Cor</th>
+                <th>Peso (kg)</th>
+                <th>Dimensões (L×A×P cm)</th>
+                <th>Preço</th>
+                <th>Promoção</th>
+                <th>Desconto</th>
+            </tr>
+            `;
+
             renderProducts(result.data ?? []);
+            statusElement.textContent = `Encontrados ${result.data?.length ?? 0} produtos processados.`;
+            statusElement.style.color = '#16a34a';
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function refreshProductsOnly() {
+        setLoading(true);
+        try {
+            const result = await callEndpoint('/api/produtos');
+            renderProductsOnly(result.data ?? []);
             statusElement.textContent = `Encontrados ${result.data?.length ?? 0} produtos processados.`;
             statusElement.style.color = '#16a34a';
         } finally {
@@ -235,17 +304,55 @@
             });
             statusElement.textContent = `${result.message} Total: ${result.total}.`;
             statusElement.style.color = '#2563eb';
-            await refreshProducts();
+            return result;
         } finally {
             setLoading(false);
         }
     }
 
-    processProductsButton.addEventListener('click', () => process('/api/processar-produtos'));
-    processPricesButton.addEventListener('click', () => process('/api/processar-precos'));
+    processProductsButton.addEventListener('click', async () => {
+        await process('/api/processar-produtos');
+        await refreshProductsOnly();
+    });
+    processPricesButton.addEventListener('click', async () => {
+        await process('/api/processar-precos');
+        // after processing prices, show all products: valores ausentes aparecem como R$ 0,00
+        await refreshProductsInclusive();
+    });
     refreshButton.addEventListener('click', refreshProducts);
 
     refreshProducts();
+
+    // Similar a refreshProducts, mas usa o endpoint inclusivo que retorna valor = 0 quando ausente
+    async function refreshProductsInclusive() {
+        setLoading(true);
+        try {
+            const result = await callEndpoint('/api/produtos-com-precos-inclusive');
+            // ensure table header includes price columns
+            const thead = document.querySelector('#products-table thead');
+            thead.innerHTML = `
+            <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Fabricante</th>
+                <th>Modelo</th>
+                <th>Cor</th>
+                <th>Peso (kg)</th>
+                <th>Dimensões (L×A×P cm)</th>
+                <th>Preço</th>
+                <th>Promoção</th>
+                <th>Desconto</th>
+            </tr>
+            `;
+
+            renderProducts(result.data ?? []);
+            statusElement.textContent = `Encontrados ${result.data?.length ?? 0} produtos processados.`;
+            statusElement.style.color = '#16a34a';
+        } finally {
+            setLoading(false);
+        }
+    }
 </script>
 </body>
 </html>

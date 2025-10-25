@@ -117,6 +117,76 @@ class DataProcessingController extends Controller
                 'pr.data_inicio_promocao',
                 'pr.data_fim_promocao',
             ])
+            // Apenas produtos que têm preço regular (valor) devem ser listados
+            // Excluir preços nulos e também valores iguais ou menores que zero
+            ->whereNotNull('pr.valor')
+            ->where('pr.valor', '>', 0)
+            ->orderBy('p.nome')
+            ->get();
+
+        return response()->json([
+            'data' => $produtos,
+        ]);
+    }
+
+    /**
+     * Retorna todos os produtos; quando não houver preço regular definido, retorna valor = 0.
+     * Usado pelo fluxo de "Processar Preços" para exibir todos os itens (com preço zerado quando ausente).
+     */
+    public function listProductsWithPricesInclusive(): JsonResponse
+    {
+        $produtos = DB::table('produto_insercao as p')
+            ->leftJoin('preco_insercao as pr', 'p.codigo', '=', 'pr.codigo_produto')
+            ->select([
+                'p.codigo',
+                'p.nome',
+                'p.categoria',
+                'p.subcategoria',
+                'p.descricao',
+                'p.fabricante',
+                'p.modelo',
+                'p.cor',
+                'p.peso_kg',
+                'p.largura_cm',
+                'p.altura_cm',
+                'p.profundidade_cm',
+                'p.unidade',
+                'p.data_cadastro',
+                // coalesce para garantir 0 quando não houver preço
+                DB::raw('COALESCE(pr.valor, 0) as valor'),
+                'pr.valor_promocional',
+                'pr.percentual_desconto',
+                'pr.percentual_acrescimo',
+                'pr.moeda',
+                'pr.data_inicio_promocao',
+                'pr.data_fim_promocao',
+            ])
+            ->orderBy('p.nome')
+            ->get();
+
+        return response()->json([
+            'data' => $produtos,
+        ]);
+    }
+
+    public function listProducts(): JsonResponse
+    {
+        $produtos = DB::table('produto_insercao as p')
+            ->select([
+                'p.codigo',
+                'p.nome',
+                'p.categoria',
+                'p.subcategoria',
+                'p.fabricante',
+                'p.modelo',
+                'p.cor',
+                'p.peso_kg',
+                'p.largura_cm',
+                'p.altura_cm',
+                'p.profundidade_cm',
+                'p.unidade',
+                'p.data_cadastro',
+            ])
             ->orderBy('p.nome')
             ->get();
 

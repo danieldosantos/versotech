@@ -70,8 +70,7 @@ return new class extends Migration
                     WHEN b.data_bruta ~ '^\\d{2}-\\d{2}-\\d{4}$' THEN TO_DATE(b.data_bruta, 'DD-MM-YYYY')
                     ELSE NULL
                 END AS data_cadastro
-            FROM base b
-            WHERE b.ativo IS TRUE;
+            FROM base b;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -143,8 +142,7 @@ return new class extends Migration
                 NULLIF(b.vendedor_responsavel, '') AS vendedor_responsavel,
                 NULLIF(b.observacao, '') AS observacao,
                 b.status
-            FROM base b
-            WHERE b.status = 'ativo';
+            FROM base b;
         SQL);
     }
 
