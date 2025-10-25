@@ -1,76 +1,121 @@
-# Versotech - Processamento de Produtos e Preços
+# 🚀 Versotech App
 
-Este projeto implementa o teste técnico para implantador de sistemas descrito no enunciado. Ele utiliza Laravel 9, PHP 8.0+ e PostgreSQL para ingerir dados brutos de produtos e preços, normalizá-los através de views SQL e disponibilizar o resultado por meio de APIs e de uma interface web simples.
+E aí! Esse projeto é uma aplicação em Laravel que faz o processamento de produtos e preços. Vou te explicar como fazer rodar na sua máquina.
 
-## Visão Geral
+## ⚡ Setup rápido
 
-- **Tabelas de origem**: `produtos_base` e `precos_base` replicam fielmente as colunas e dados fornecidos no teste.
-- **Views de processamento**: `vw_produtos_processados` e `vw_precos_processados` higienizam textos, convertem números, normalizam datas heterogêneas e filtram registros ativos.
-- **Tabelas de destino**: `produto_insercao` e `preco_insercao` recebem os dados já tratados.
-- **APIs**: endpoints REST permitem acionar o processamento e consultar os produtos com preços.
-- **Frontend**: página com botões de execução e tabela responsiva para visualizar o resultado.
+Primeiro, se liga no que você precisa ter instalado:
 
-## Requisitos
+- PHP 8.2 ou mais recente
+- Composer (pra instalar as dependências do Laravel)
+- Node.js (pra rodar o frontend)
+- PostgreSQL (ou Docker se preferir)
 
-- PHP 8.0+
-- Composer
-- PostgreSQL 12+
-- Node 18+ (apenas se desejar reconstruir os assets via Vite)
+### 🐳 Se for usar Docker pro banco:
 
-## Instalação
+Cola esse comando no terminal:
+```bash
+docker run --name versotech-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=versotech_app -p 5432:5432 -d postgres:15
+```
 
+### 💻 Pra rodar o projeto:
+
+1. Clona o repo:
+```bash
+git clone <url-do-repo>
+cd Versotech-app
+```
+
+2. Instala as dependências:
+```bash
+composer install
+npm install
+```
+
+3. Cria o arquivo .env e gera a chave:
 ```bash
 cp .env.example .env
-composer install
 php artisan key:generate
 ```
 
-Configure as credenciais do PostgreSQL no arquivo `.env` para as variáveis `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD`.
-
-## Banco de Dados
-
-Execute as migrations e a carga inicial:
-
-```bash
-php artisan migrate
-php artisan db:seed
+4. Configura o banco no .env:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=versotech_app
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
-O diretório [`database/sql`](database/sql/base_schema.sql) contém um script SQL equivalente para criação e popularização das tabelas de origem, caso deseje carregar os dados diretamente no banco.
+5. Cria as tabelas e coloca uns dados de exemplo:
+```bash
+php artisan migrate --seed
+```
 
-## Views de Processamento
+6. Roda a app:
 
-As migrations criam duas views principais:
+No primeiro terminal:
+```bash
+php artisan serve
+```
 
-- `vw_produtos_processados`: normaliza códigos, títulos, textos e converte medidas (peso em quilogramas e dimensões em centímetros). Também padroniza datas com múltiplos formatos.
-- `vw_precos_processados`: garante valores numéricos válidos para preço, desconto, acréscimo e promoção, além de converter datas textuais e considerar apenas registros com status ativo.
+Em outro terminal:
+```bash
+npm run dev
+```
 
-Os endpoints de processamento populam as tabelas de destino a partir dessas views sempre que executados.
+Pronto! Só acessar http://localhost:8000 🎉
 
-## APIs Disponíveis
+## � Como usar
 
-| Método | Rota                       | Descrição                                         |
-|--------|---------------------------|---------------------------------------------------|
-| POST   | `/api/processar-produtos` | Limpa a tabela `produto_insercao` e repovoa com os dados tratados de produtos. |
-| POST   | `/api/processar-precos`   | Limpa a tabela `preco_insercao` e repovoa com os dados tratados de preços.    |
-| GET    | `/api/produtos-com-precos`| Retorna a listagem consolidada de produtos com informações de preço.          |
+Quando você abrir a app, vai ter 3 botões:
 
-As rotas retornam JSON com mensagens de status e, quando aplicável, a quantidade de registros afetados.
+- **Processar Produtos**: Pega os produtos da base e trata os dados
+- **Processar Preços**: Pega os preços e trata. Produtos sem preço aparecem como R$ 0,00
+- **Listar Produtos com Preços**: Mostra só os produtos que têm preço maior que zero
 
-## Interface Web
+## 🔧 Como funciona
 
-A rota `/` entrega a view `resources/views/dashboard.blade.php`, que disponibiliza:
+A app tem:
+- 2 tabelas base: `produtos_base` e `precos_base`
+- Views SQL que limpam os dados: `vw_produtos_processados` e `vw_precos_processados`
+- 2 tabelas de destino: `produto_insercao` e `preco_insercao`
+- API REST pra processar e listar os produtos
 
-- Botões para acionar o processamento de produtos e preços.
-- Botão para atualizar a listagem.
-- Tabela responsiva exibindo dados tratados, incluindo valores monetários e descontos formatados.
+Endpoints da API:
+- POST `/api/processar-produtos`: Processa os produtos
+- POST `/api/processar-precos`: Processa os preços
+- GET `/api/produtos-com-precos`: Lista produtos com preço regular
+- GET `/api/produtos-com-precos-inclusive`: Lista todos produtos (preço zero quando não tem)
+- GET `/api/produtos`: Lista só produtos sem preço
 
-A página utiliza `fetch` para consumir as APIs e apresenta mensagens de feedback sobre cada ação.
+## 🤔 Problemas comuns
 
-## Testes
+### Erro de driver do Postgres
+Se der erro de driver, é só descomentar essas linhas no php.ini:
+```ini
+extension=pdo_pgsql
+extension=pgsql
+```
 
-O projeto mantém a suíte padrão do Laravel. Utilize `php artisan test` para executá-la.
+### Erro no composer install
+Tenta rodar:
+```bash
+composer update
+```
 
----
+### Página em branco
+Verifica se você rodou:
+```bash
+npm install
+npm run dev
+```
 
-Qualquer ajuste adicional (ex.: publicação em produção, autenticação ou paginação) pode ser implementado sobre esta base funcional.
+## 🤝 Quer ajudar?
+
+Tamo aceitando PR! Faz um fork, manda suas alterações e abre aquele PR maroto 😎
+
+## 📞 Precisa de ajuda?
+
+Qualquer dúvida, me chama! Tamo junto! �
