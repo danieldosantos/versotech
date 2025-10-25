@@ -8,7 +8,6 @@ Primeiro, se liga no que você precisa ter instalado:
 
 - PHP 8.2 ou mais recente
 - Composer (pra instalar as dependências do Laravel)
-- Node.js (pra rodar o frontend)
 - PostgreSQL (ou Docker se preferir)
 
 ### 🐳 Se for usar Docker pro banco:
@@ -29,7 +28,6 @@ cd Versotech-app
 2. Instala as dependências:
 ```bash
 composer install
-npm install
 ```
 
 3. Cria o arquivo .env e gera a chave:
@@ -53,16 +51,9 @@ DB_PASSWORD=postgres
 php artisan migrate --seed
 ```
 
-6. Roda a app:
-
-No primeiro terminal:
+5. Roda a app:
 ```bash
 php artisan serve
-```
-
-Em outro terminal:
-```bash
-npm run dev
 ```
 
 Pronto! Só acessar http://localhost:8000 🎉
