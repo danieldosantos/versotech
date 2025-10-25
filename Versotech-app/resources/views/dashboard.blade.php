@@ -428,9 +428,7 @@
                         <th>Modelo</th>
                         <th>Cor</th>
                         <th>Peso (kg)</th>
-                        <th>Largura (cm)</th>
-                        <th>Altura (cm)</th>
-                        <th>Profundidade (cm)</th>
+                        <th>Dimensões (L×A×P cm)</th>
                         <th>Unidade</th>
                         <th>Cadastro</th>
                         <th>Moeda</th>
@@ -451,7 +449,7 @@
                     </tr>
                     </thead>
                     <tbody id="products-body">
-                    <tr class="empty"><td colspan="29">Nenhum produto processado ainda.</td></tr>
+                    <tr class="empty"><td colspan="27">Nenhum produto processado ainda.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -479,9 +477,7 @@
             <th>Modelo</th>
             <th>Cor</th>
             <th>Peso (kg)</th>
-            <th>Largura (cm)</th>
-            <th>Altura (cm)</th>
-            <th>Profundidade (cm)</th>
+            <th>Dimensões (L×A×P cm)</th>
             <th>Unidade</th>
             <th>Cadastro</th>
             <th>Moeda</th>
@@ -728,7 +724,7 @@
         setPriceMode(true);
         tableBody.innerHTML = '';
         if (!data.length) {
-            tableBody.innerHTML = '<tr class="empty"><td colspan="29">Nenhum produto disponível.</td></tr>';
+            tableBody.innerHTML = '<tr class="empty"><td colspan="27">Nenhum produto disponível.</td></tr>';
             updateStatus('Nenhum produto disponível.', 'warning');
             return;
         }
@@ -744,9 +740,7 @@
                 <td>${formatText(item.modelo)}</td>
                 <td>${formatText(item.cor)}</td>
                 <td>${formatNumber(item.peso_kg, 3)}</td>
-                <td>${formatNumber(item.largura_cm)}</td>
-                <td>${formatNumber(item.altura_cm)}</td>
-                <td>${formatNumber(item.profundidade_cm)}</td>
+                <td>${[item.largura_cm, item.altura_cm, item.profundidade_cm].map(v => formatNumber(v)).join(' × ')}</td>
                 <td>${formatText(item.unidade)}</td>
                 <td>${formatText(item.data_cadastro)}</td>
                 <td>${formatMoeda(item.moeda)}</td>
