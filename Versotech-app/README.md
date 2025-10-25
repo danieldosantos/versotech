@@ -1,61 +1,76 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Versotech - Processamento de Produtos e Preços
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este projeto implementa o teste técnico para implantador de sistemas descrito no enunciado. Ele utiliza Laravel 12, PHP 8.2 e PostgreSQL para ingerir dados brutos de produtos e preços, normalizá-los através de views SQL e disponibilizar o resultado por meio de APIs e de uma interface web simples.
 
-## About Laravel
+## Visão Geral
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Tabelas de origem**: `produtos_base` e `precos_base` replicam fielmente as colunas e dados fornecidos no teste.
+- **Views de processamento**: `vw_produtos_processados` e `vw_precos_processados` higienizam textos, convertem números, normalizam datas heterogêneas e filtram registros ativos.
+- **Tabelas de destino**: `produto_insercao` e `preco_insercao` recebem os dados já tratados.
+- **APIs**: endpoints REST permitem acionar o processamento e consultar os produtos com preços.
+- **Frontend**: página com botões de execução e tabela responsiva para visualizar o resultado.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- PostgreSQL 12+
+- Node 18+ (apenas se desejar reconstruir os assets via Vite)
 
-## Learning Laravel
+## Instalação
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+cp .env.example .env
+composer install
+php artisan key:generate
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Configure as credenciais do PostgreSQL no arquivo `.env` para as variáveis `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Banco de Dados
 
-## Laravel Sponsors
+Execute as migrations e a carga inicial:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-### Premium Partners
+O diretório [`database/sql`](database/sql/base_schema.sql) contém um script SQL equivalente para criação e popularização das tabelas de origem, caso deseje carregar os dados diretamente no banco.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Views de Processamento
 
-## Contributing
+As migrations criam duas views principais:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- `vw_produtos_processados`: normaliza códigos, títulos, textos e converte medidas (peso em quilogramas e dimensões em centímetros). Também padroniza datas com múltiplos formatos.
+- `vw_precos_processados`: garante valores numéricos válidos para preço, desconto, acréscimo e promoção, além de converter datas textuais e considerar apenas registros com status ativo.
 
-## Code of Conduct
+Os endpoints de processamento populam as tabelas de destino a partir dessas views sempre que executados.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## APIs Disponíveis
 
-## Security Vulnerabilities
+| Método | Rota                       | Descrição                                         |
+|--------|---------------------------|---------------------------------------------------|
+| POST   | `/api/processar-produtos` | Limpa a tabela `produto_insercao` e repovoa com os dados tratados de produtos. |
+| POST   | `/api/processar-precos`   | Limpa a tabela `preco_insercao` e repovoa com os dados tratados de preços.    |
+| GET    | `/api/produtos-com-precos`| Retorna a listagem consolidada de produtos com informações de preço.          |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+As rotas retornam JSON com mensagens de status e, quando aplicável, a quantidade de registros afetados.
 
-## License
+## Interface Web
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+A rota `/` entrega a view `resources/views/dashboard.blade.php`, que disponibiliza:
+
+- Botões para acionar o processamento de produtos e preços.
+- Botão para atualizar a listagem.
+- Tabela responsiva exibindo dados tratados, incluindo valores monetários e descontos formatados.
+
+A página utiliza `fetch` para consumir as APIs e apresenta mensagens de feedback sobre cada ação.
+
+## Testes
+
+O projeto mantém a suíte padrão do Laravel. Utilize `php artisan test` para executá-la.
+
+---
+
+Qualquer ajuste adicional (ex.: publicação em produção, autenticação ou paginação) pode ser implementado sobre esta base funcional.
