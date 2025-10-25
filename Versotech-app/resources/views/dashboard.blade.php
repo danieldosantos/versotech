@@ -386,17 +386,7 @@
                     <path d="M9 13H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
                 Processar Produtos
-            </button>
-            <button id="process-prices">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M5.75 5.75H18.25V18.25H5.75V5.75Z" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M9 9H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M9 12H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M9 15H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                Processar Preços
-            </button>
-            <button id="refresh-list">
+            </button><button id="refresh-list">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M6 7H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                     <path d="M6 12H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -461,7 +451,6 @@
     const statusElement = document.getElementById('status');
     const statusWrapper = document.querySelector('.status-wrapper');
     const processProductsButton = document.getElementById('process-products');
-    const processPricesButton = document.getElementById('process-prices');
     const refreshButton = document.getElementById('refresh-list');
     const tableBody = document.getElementById('products-body');
     const tableHead = document.querySelector('#products-table thead');
@@ -565,7 +554,6 @@
 
     function setLoading(isLoading) {
         processProductsButton.disabled = isLoading;
-        processPricesButton.disabled = isLoading;
         refreshButton.disabled = isLoading;
     }
 
@@ -844,10 +832,6 @@
 
     processProductsButton.addEventListener('click', async () => {
         await process('/api/processar-produtos');
-        await refreshProductsOnly();
-    });
-
-    processPricesButton.addEventListener('click', async () => {
         await process('/api/processar-precos');
         await refreshProductsInclusive();
     });
@@ -858,3 +842,5 @@
 </script>
 </body>
 </html>
+
+
