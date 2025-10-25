@@ -4,9 +4,7 @@ E aí! Esse projeto é uma aplicação em Laravel que faz o processamento de pro
 
 ## ⚡ Setup rápido
 
-Primeiro, se liga no que você precisa ter instalado:
-
-- PHP 8.2 ou mais recente
+- PHP 8.2 ou mais 9
 - Composer (pra instalar as dependências do Laravel)
 - PostgreSQL (ou Docker se preferir)
 
