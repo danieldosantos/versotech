@@ -1,6 +1,6 @@
 # Versotech - Processamento de Produtos e Preços
 
-Este projeto implementa o teste técnico para implantador de sistemas descrito no enunciado. Ele utiliza Laravel 12, PHP 8.2 e PostgreSQL para ingerir dados brutos de produtos e preços, normalizá-los através de views SQL e disponibilizar o resultado por meio de APIs e de uma interface web simples.
+Este projeto implementa o teste técnico para implantador de sistemas descrito no enunciado. Ele utiliza Laravel 9, PHP 8.0+ e PostgreSQL para ingerir dados brutos de produtos e preços, normalizá-los através de views SQL e disponibilizar o resultado por meio de APIs e de uma interface web simples.
 
 ## Visão Geral
 
@@ -12,7 +12,7 @@ Este projeto implementa o teste técnico para implantador de sistemas descrito n
 
 ## Requisitos
 
-- PHP 8.2+
+- PHP 8.0+
 - Composer
 - PostgreSQL 12+
 - Node 18+ (apenas se desejar reconstruir os assets via Vite)
