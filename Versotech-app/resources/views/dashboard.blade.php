@@ -225,7 +225,8 @@
         }
         td {
             white-space: normal;
-            word-break: break-word;
+            word-break: normal;
+            overflow-wrap: anywhere;
         }
         .table-wrapper::-webkit-scrollbar {
             height: 10px;
