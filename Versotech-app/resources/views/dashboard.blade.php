@@ -133,13 +133,25 @@
                 <th>Cor</th>
                 <th>Peso (kg)</th>
                 <th>Dimensões (L×A×P cm)</th>
-                <th>Preço</th>
+                <th>Moeda</th>
+                <th>Valor</th>
                 <th>Promoção</th>
-                <th>Desconto</th>
+                <th>Desconto (%)</th>
+                <th>Acréscimo (%)</th>
+                <th>Início Promoção</th>
+                <th>Fim Promoção</th>
+                <th>Atualização</th>
+                <th>Origem</th>
+                <th>Tipo Cliente</th>
+                <th>Vendedor</th>
+                <th>Observações</th>
+                <th>Status</th>
+                <th>Preço Efetivo</th>
+                <th>Tem Preço</th>
             </tr>
             </thead>
             <tbody id="products-body">
-            <tr class="empty"><td colspan="11">Nenhum produto processado ainda.</td></tr>
+            <tr class="empty"><td colspan="23">Nenhum produto processado ainda.</td></tr>
             </tbody>
         </table>
     </div>
@@ -151,6 +163,48 @@
     const processPricesButton = document.getElementById('process-prices');
     const refreshButton = document.getElementById('refresh-list');
     const tableBody = document.getElementById('products-body');
+    const tableHead = document.querySelector('#products-table thead');
+
+    const PRICE_TABLE_HEADER = `
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Cor</th>
+            <th>Peso (kg)</th>
+            <th>Dimensões (L×A×P cm)</th>
+            <th>Moeda</th>
+            <th>Valor</th>
+            <th>Promoção</th>
+            <th>Desconto (%)</th>
+            <th>Acréscimo (%)</th>
+            <th>Início Promoção</th>
+            <th>Fim Promoção</th>
+            <th>Atualização</th>
+            <th>Origem</th>
+            <th>Tipo Cliente</th>
+            <th>Vendedor</th>
+            <th>Observações</th>
+            <th>Status</th>
+            <th>Preço Efetivo</th>
+            <th>Tem Preço</th>
+        </tr>
+    `;
+
+    const PRODUCT_TABLE_HEADER = `
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Cor</th>
+            <th>Peso (kg)</th>
+            <th>Dimensões (L×A×P cm)</th>
+        </tr>
+    `;
 
     async function callEndpoint(endpoint, options = {}) {
         try {
@@ -172,6 +226,10 @@
         refreshButton.disabled = isLoading;
     }
 
+    function setTableHeader(template) {
+        tableHead.innerHTML = template;
+    }
+
     function formatNumber(value, decimals = 2) {
         if (value === null || value === undefined) {
             return '—';
@@ -186,10 +244,43 @@
         });
     }
 
+    function formatCurrency(value) {
+        const formatted = formatNumber(value);
+        return formatted === '—' ? '—' : `R$ ${formatted}`;
+    }
+
+    function formatPercent(value) {
+        if (value === null || value === undefined) {
+            return '—';
+        }
+        const numericValue = Number(value);
+        if (!Number.isFinite(numericValue)) {
+            return '—';
+        }
+        return `${formatNumber(numericValue * 100, 2)}%`;
+    }
+
+    function formatText(value) {
+        if (value === null || value === undefined) {
+            return '—';
+        }
+        const text = String(value).trim();
+        return text.length ? text : '—';
+    }
+
+    function formatMoeda(value) {
+        if (value === null || value === undefined) {
+            return '—';
+        }
+        const text = String(value).trim();
+        return text.length ? text.toUpperCase() : '—';
+    }
+
     function renderProducts(data) {
+        setTableHeader(PRICE_TABLE_HEADER);
         tableBody.innerHTML = '';
         if (!data.length) {
-            tableBody.innerHTML = '<tr class="empty"><td colspan="11">Nenhum produto disponível.</td></tr>';
+            tableBody.innerHTML = '<tr class="empty"><td colspan="23">Nenhum produto disponível.</td></tr>';
             return;
         }
 
@@ -204,9 +295,21 @@
                 <td data-label="Cor">${item.cor ?? '—'}</td>
                 <td data-label="Peso (kg)">${formatNumber(item.peso_kg, 3)}</td>
                 <td data-label="Dimensões">${[item.largura_cm, item.altura_cm, item.profundidade_cm].map(v => formatNumber(v)).join(' × ')}</td>
-                <td data-label="Preço">${(item.valor !== null && item.valor !== undefined) ? `R$ ${formatNumber(item.valor)}` : (item.valor_promocional ? `R$ ${formatNumber(item.valor_promocional)}` : '—')}</td>
-                <td data-label="Promoção">${(item.valor_promocional && item.valor_promocional !== null && item.valor_promocional !== item.valor) ? `R$ ${formatNumber(item.valor_promocional)}` : '—'}</td>
-                <td data-label="Desconto">${item.percentual_desconto ? `${formatNumber(item.percentual_desconto * 100, 1)}%` : '—'}</td>
+                <td data-label="Moeda">${formatMoeda(item.moeda)}</td>
+                <td data-label="Valor">${formatCurrency(item.valor)}</td>
+                <td data-label="Promoção">${formatCurrency(item.valor_promocional)}</td>
+                <td data-label="Desconto (%)">${formatPercent(item.percentual_desconto)}</td>
+                <td data-label="Acréscimo (%)">${formatPercent(item.percentual_acrescimo)}</td>
+                <td data-label="Início Promoção">${formatText(item.data_inicio_promocao)}</td>
+                <td data-label="Fim Promoção">${formatText(item.data_fim_promocao)}</td>
+                <td data-label="Atualização">${formatText(item.data_atualizacao)}</td>
+                <td data-label="Origem">${formatText(item.origem)}</td>
+                <td data-label="Tipo Cliente">${formatText(item.tipo_cliente)}</td>
+                <td data-label="Vendedor">${formatText(item.vendedor_responsavel)}</td>
+                <td data-label="Observações">${formatText(item.observacao)}</td>
+                <td data-label="Status">${formatText(item.status)}</td>
+                <td data-label="Preço Efetivo">${formatCurrency(item.preco_efetivo)}</td>
+                <td data-label="Tem Preço">${item.tem_preco ? 'Sim' : 'Não'}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -215,19 +318,7 @@
     // Render somente colunas de produto (sem preço)
     function renderProductsOnly(data) {
         // rebuild header to product-only columns
-        const thead = document.querySelector('#products-table thead');
-        thead.innerHTML = `
-            <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Fabricante</th>
-                <th>Modelo</th>
-                <th>Cor</th>
-                <th>Peso (kg)</th>
-                <th>Dimensões (L×A×P cm)</th>
-            </tr>
-        `;
+        setTableHeader(PRODUCT_TABLE_HEADER);
 
         tableBody.innerHTML = '';
         if (!data.length) {
@@ -255,24 +346,6 @@
         setLoading(true);
         try {
             const result = await callEndpoint('/api/produtos-com-precos');
-            // ensure table header includes price columns
-            const thead = document.querySelector('#products-table thead');
-            thead.innerHTML = `
-            <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Fabricante</th>
-                <th>Modelo</th>
-                <th>Cor</th>
-                <th>Peso (kg)</th>
-                <th>Dimensões (L×A×P cm)</th>
-                <th>Preço</th>
-                <th>Promoção</th>
-                <th>Desconto</th>
-            </tr>
-            `;
-
             renderProducts(result.data ?? []);
             statusElement.textContent = `Encontrados ${result.data?.length ?? 0} produtos processados.`;
             statusElement.style.color = '#16a34a';
@@ -328,24 +401,6 @@
         setLoading(true);
         try {
             const result = await callEndpoint('/api/produtos-com-precos-inclusive');
-            // ensure table header includes price columns
-            const thead = document.querySelector('#products-table thead');
-            thead.innerHTML = `
-            <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Fabricante</th>
-                <th>Modelo</th>
-                <th>Cor</th>
-                <th>Peso (kg)</th>
-                <th>Dimensões (L×A×P cm)</th>
-                <th>Preço</th>
-                <th>Promoção</th>
-                <th>Desconto</th>
-            </tr>
-            `;
-
             renderProducts(result.data ?? []);
             statusElement.textContent = `Encontrados ${result.data?.length ?? 0} produtos processados.`;
             statusElement.style.color = '#16a34a';

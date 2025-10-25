@@ -109,13 +109,21 @@ class DataProcessingController extends Controller
                 'p.profundidade_cm',
                 'p.unidade',
                 'p.data_cadastro',
+                'pr.moeda',
                 'pr.valor',
                 'pr.valor_promocional',
                 'pr.percentual_desconto',
                 'pr.percentual_acrescimo',
-                'pr.moeda',
                 'pr.data_inicio_promocao',
                 'pr.data_fim_promocao',
+                'pr.data_atualizacao',
+                'pr.origem',
+                'pr.tipo_cliente',
+                'pr.vendedor_responsavel',
+                'pr.observacao',
+                'pr.status',
+                DB::raw('CASE WHEN pr.valor_promocional IS NOT NULL AND pr.valor_promocional > 0 THEN pr.valor_promocional ELSE pr.valor END as preco_efetivo'),
+                DB::raw('CASE WHEN pr.valor IS NOT NULL AND pr.valor > 0 THEN true ELSE false END as tem_preco'),
             ])
             // Apenas produtos que têm preço regular (valor) devem ser listados
             // Excluir preços nulos e também valores iguais ou menores que zero
@@ -153,13 +161,21 @@ class DataProcessingController extends Controller
                 'p.unidade',
                 'p.data_cadastro',
                 // coalesce para garantir 0 quando não houver preço
+                'pr.moeda',
                 DB::raw('COALESCE(pr.valor, 0) as valor'),
                 'pr.valor_promocional',
                 'pr.percentual_desconto',
                 'pr.percentual_acrescimo',
-                'pr.moeda',
                 'pr.data_inicio_promocao',
                 'pr.data_fim_promocao',
+                'pr.data_atualizacao',
+                'pr.origem',
+                'pr.tipo_cliente',
+                'pr.vendedor_responsavel',
+                'pr.observacao',
+                'pr.status',
+                DB::raw('CASE WHEN pr.valor_promocional IS NOT NULL AND pr.valor_promocional > 0 THEN pr.valor_promocional ELSE COALESCE(pr.valor, 0) END as preco_efetivo'),
+                DB::raw('CASE WHEN pr.valor IS NOT NULL AND pr.valor > 0 THEN true ELSE false END as tem_preco'),
             ])
             ->orderBy('p.nome')
             ->get();
