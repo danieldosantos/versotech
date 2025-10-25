@@ -13,6 +13,11 @@ Instale os softwares abaixo antes de começar:
 
 > **Dica:** Se estiver usando Docker ou ferramentas como Laravel Sail, adapte os comandos conforme o provedor escolhido.
 
+> **Nota sobre PostgreSQL:** O banco de dados PostgreSQL está configurado para rodar no Docker. Para iniciá-lo, execute:
+> ```bash
+> docker run --name versotech-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=versotech_app -p 5432:5432 -d postgres:15
+> ```
+
 ## Visão geral das pastas
 
 | Caminho               | Descrição                                                                                     |
