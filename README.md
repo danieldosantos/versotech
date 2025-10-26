@@ -1,7 +1,5 @@
 # Versotech App
 
-Aplicação Laravel para processar e listar produtos e seus preços a partir de bases “cruas”, normalizando textos, dimensões, valores e datas, e exibindo uma planilha clássica com todas as colunas.
-
 ## Requisitos
 - PHP 8.1+
 - Composer
@@ -57,10 +55,6 @@ Arquivo: `resources/views/dashboard.blade.php`
 - Processar via CLI: `php scripts/call_processor.php` (produtos), `php scripts/call_processor_prices.php` (preços)
 - Conferir bases cruas: `php scripts/check_bases.php`
 - Inspecionar datas da view de preços: `php scripts/debug_view_dates.php`
-
-## Notas técnicas
-- O parser de datas das views aceita vários formatos (YYYY-MM-DD, DD-MM-YYYY e variações com hora). Se alterar as expressões, recrie as views e reprocesse.
-- O processamento de preços prioriza registros com `data_atualizacao` válida para evitar sobrescrever dados corretos por linhas sem data.
 
 ## Onde estão as coisas
 - Controlador e lógica de carga: `app/Http/Controllers/DataProcessingController.php`
