@@ -43,12 +43,6 @@ Arquivo: `resources/views/dashboard.blade.php`
   - `Listar Produtos com Preços`: atualiza a listagem sem reprocessar.
 - Planilha clássica completa: exibe Produto + Preço + Metadados (29 colunas). Devido à quantidade de colunas, a tabela permite rolagem horizontal quando necessário.
 
-## API (resumo)
-- `POST /api/processar-produtos` — processa produtos (view → `produto_insercao`).
-- `POST /api/processar-precos` — processa preços (view → `preco_insercao`).
-- `GET  /api/produtos` — somente colunas de produto.
-- `GET  /api/produtos-com-precos` — produtos com preço regular (> 0).
-- `GET  /api/produtos-com-precos-inclusive` — todos os produtos; quando não houver preço, `valor = 0`.
 
 ## Scripts úteis (opcionais)
 - Recriar as views SQL de processamento: `php scripts/recreate_views.php`
