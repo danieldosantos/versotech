@@ -41,7 +41,7 @@ Arquivo: `resources/views/dashboard.blade.php`
 - Botões da interface:
   - `Processar Produtos`: executa o pipeline completo (processa produtos e preços) e depois atualiza a listagem.
   - `Listar Produtos com Preços`: atualiza a listagem sem reprocessar.
-- Planilha clássica completa: exibe Produto + Preço + Metadados (29 colunas). Devido à quantidade de colunas, a tabela permite rolagem horizontal quando necessário.
+
 
 
 ## Scripts úteis (opcionais)
