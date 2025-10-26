@@ -1,110 +1,70 @@
-# 🚀 Versotech App
+# Versotech App
 
-E aí! Esse projeto é uma aplicação em Laravel que faz o processamento de produtos e preços. Vou te explicar como fazer rodar na sua máquina.
+Aplicação Laravel para processar e listar produtos e seus preços a partir de bases “cruas”, normalizando textos, dimensões, valores e datas, e exibindo uma planilha clássica com todas as colunas.
 
-## ⚡ Setup rápido
+## Requisitos
+- PHP 8.1+
+- Composer
+- PostgreSQL 13+
 
-- PHP 8.2 ou mais 9
-- Composer (pra instalar as dependências do Laravel)
-- PostgreSQL (ou Docker se preferir)
+## Configuração
+1) Entre na pasta do projeto `Versotech-app`.
+2) Copie o arquivo de exemplo e gere a chave:
+   - `cp .env.example .env`
+   - `php artisan key:generate`
+3) Configure o banco no `.env` (exemplo PostgreSQL local):
+   ```env
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=versotech_app
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   ```
+4) Instale as dependências: `composer install`
+5) Rode as migrations (tabelas + views). Se quiser dados de exemplo, use `--seed`:
+   - `php artisan migrate`
+   - (opcional) `php artisan migrate --seed`
 
-### 🐳 Se for usar Docker pro banco:
-
-Cola esse comando no terminal:
+Banco via Docker (opcional):
 ```bash
-docker run --name versotech-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=versotech_app -p 5432:5432 -d postgres:15
+docker run --name versotech-postgres \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=versotech_app \
+  -p 5432:5432 -d postgres:15
 ```
 
-### 💻 Pra rodar o projeto:
+## Executando
+- Servidor de desenvolvimento: `php artisan serve`
+- Acesse: `http://127.0.0.1:8000`
 
-1. Clona o repo:
-```bash
-git clone <url-do-repo>
-cd Versotech-app
-```
+## Frontend (dashboard)
+Arquivo: `resources/views/dashboard.blade.php`
 
-2. Instala as dependências:
-```bash
-composer install
-```
+- Botões da interface:
+  - `Processar Produtos`: executa o pipeline completo (processa produtos e preços) e depois atualiza a listagem.
+  - `Listar Produtos com Preços`: atualiza a listagem sem reprocessar.
+- Planilha clássica completa: exibe Produto + Preço + Metadados (29 colunas). Devido à quantidade de colunas, a tabela permite rolagem horizontal quando necessário.
 
-3. Cria o arquivo .env e gera a chave:
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+## API (resumo)
+- `POST /api/processar-produtos` — processa produtos (view → `produto_insercao`).
+- `POST /api/processar-precos` — processa preços (view → `preco_insercao`).
+- `GET  /api/produtos` — somente colunas de produto.
+- `GET  /api/produtos-com-precos` — produtos com preço regular (> 0).
+- `GET  /api/produtos-com-precos-inclusive` — todos os produtos; quando não houver preço, `valor = 0`.
 
-4. Configura o banco no .env:
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=versotech_app
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-```
+## Scripts úteis (opcionais)
+- Recriar as views SQL de processamento: `php scripts/recreate_views.php`
+- Processar via CLI: `php scripts/call_processor.php` (produtos), `php scripts/call_processor_prices.php` (preços)
+- Conferir bases cruas: `php scripts/check_bases.php`
+- Inspecionar datas da view de preços: `php scripts/debug_view_dates.php`
 
-5. Cria as tabelas e coloca uns dados de exemplo:
-```bash
-php artisan migrate --seed
-```
+## Notas técnicas
+- O parser de datas das views aceita vários formatos (YYYY-MM-DD, DD-MM-YYYY e variações com hora). Se alterar as expressões, recrie as views e reprocesse.
+- O processamento de preços prioriza registros com `data_atualizacao` válida para evitar sobrescrever dados corretos por linhas sem data.
 
-5. Roda a app:
-```bash
-php artisan serve
-```
+## Onde estão as coisas
+- Controlador e lógica de carga: `app/Http/Controllers/DataProcessingController.php`
+- Rotas da API: `routes/api.php`
+- Views SQL de processamento: `database/migrations/2025_10_25_123236_create_processed_views.php`
+- Migrações de tabelas base/destino: `database/migrations/*create_*_table.php`
 
-Pronto! Só acessar http://localhost:8000 🎉
-
-## � Como usar
-
-Quando você abrir a app, vai ter 3 botões:
-
-- **Processar Produtos**: Pega os produtos da base e trata os dados
-- **Processar Preços**: Pega os preços e trata. Produtos sem preço aparecem como R$ 0,00
-- **Listar Produtos com Preços**: Mostra só os produtos que têm preço maior que zero
-
-## 🔧 Como funciona
-
-A app tem:
-- 2 tabelas base: `produtos_base` e `precos_base`
-- Views SQL que limpam os dados: `vw_produtos_processados` e `vw_precos_processados`
-- 2 tabelas de destino: `produto_insercao` e `preco_insercao`
-- API REST pra processar e listar os produtos
-
-Endpoints da API:
-- POST `/api/processar-produtos`: Processa os produtos
-- POST `/api/processar-precos`: Processa os preços
-- GET `/api/produtos-com-precos`: Lista produtos com preço regular
-- GET `/api/produtos-com-precos-inclusive`: Lista todos produtos (preço zero quando não tem)
-- GET `/api/produtos`: Lista só produtos sem preço
-
-## 🤔 Problemas comuns
-
-### Erro de driver do Postgres
-Se der erro de driver, é só descomentar essas linhas no php.ini:
-```ini
-extension=pdo_pgsql
-extension=pgsql
-```
-
-### Erro no composer install
-Tenta rodar:
-```bash
-composer update
-```
-
-### Página em branco
-Verifica se você rodou:
-```bash
-npm install
-npm run dev
-```
-
-## 🤝 Quer ajudar?
-
-Tamo aceitando PR! Faz um fork, manda suas alterações e abre aquele PR maroto 😎
-
-## 📞 Precisa de ajuda?
-
-Qualquer dúvida, me chama! Tamo junto! �
